@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daniela Gabriel Suárez — Flight Log</title>
+  <meta name="description" content="Portfolio of Daniela Gabriel Suárez, an accounting student at UTTECAM learning to take care of money in the cloud with AWS and FinOps.">
+  <meta name="theme-color" content="#BFE3F5">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Daniela Gabriel Suárez — Flight Log">
+  <meta property="og:description" content="Accounting student learning to take care of money in the cloud.">
+  <!-- TODO after deploying: social sites need the full address, e.g. https://main.xxxx.amplifyapp.com/assets/og-image.png -->
+  <meta property="og:image" content="assets/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700&display=swap">
+  <link rel="preload" as="image" href="assets/hero-plane.webp" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Apply the saved theme before first paint so the page never flashes the wrong sky -->
+  <script>
+    try {
+      var t = localStorage.getItem('theme');
+      if (t === 'night' || t === 'day') document.documentElement.dataset.theme = t;
+    } catch (e) {}
+    document.documentElement.classList.add('js');
+
+    // Intro: once per visit, never for deep links or for people who turned animations off
+    try {
+      var root = document.documentElement;
+      var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var seen = false;
+      try { seen = sessionStorage.getItem('introSeen') === '1'; } catch (e) {}
+      if (!calm && !location.hash && !seen) {
+        root.classList.add('intro-on', 'intro-hold', 'vinyl-hold');
+        // Safety net: if script.js never starts, never leave the page covered
+        setTimeout(function () {
+          if (!window.__introReady) root.classList.remove('intro-on', 'intro-hold', 'vinyl-hold');
+        }, 4000);
+      }
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <!-- Icon sprite: simple 24px line icons drawn with currentColor -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 8"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10.5h.01M12 10.5h.01M16 10.5h.01"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.2 19a1.4 1.4 0 0 0 1.2 2h13.2a1.4 1.4 0 0 0 1.2-2L14 9V3"/><path d="M7 15h10"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.5"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.5"/></symbol>
+    <symbol id="i-crate" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M4 11.5h16M12 7v13M8 4h8"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M3.5 17a8.5 8.5 0 1 1 17 0"/><path d="M12 17l4.5-5"/><path d="M6.5 13.5l1 .6M12 8.5v1.2M17.5 13.5l-1 .6"/></symbol>
+    <symbol id="i-nowaste" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 24 24"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+    <!-- Cockpit dial: half circle, ticks and the green "in use" zone -->
+    <symbol id="dial" viewBox="0 0 120 70">
+      <path class="dial-track" d="M12 62A48 48 0 0 1 108 62"/>
+      <path class="dial-zone" d="M84 20.4A48 48 0 0 1 107.8 57.8"/>
+      <path class="dial-ticks" d="M24 62H18M28.8 44l-5.2-3M42 30.8l-3-5.2M60 26v-6M78 30.8l3-5.2M91.2 44l5.2-3M96 62h6"/>
+    </symbol>
+  </svg>
+
+  <!-- Intro: loading → choose sound → the camera climbs through the clouds to the hero.
+       Only shown when <html> has the "intro" class (set in <head>). -->
+  <div class="intro" id="intro" data-stage="loading" role="dialog" aria-modal="true" aria-labelledby="intro-mark">
+    <div class="intro-bg" aria-hidden="true"></div>
+    <div class="intro-sky" aria-hidden="true">
+      <img class="intro-cloud" src="assets/cloud-1.webp" alt="" width="429" height="211" style="--x: 4%; --y: 10%; --w: 30vw; --d: 0.5;">
+      <img class="intro-cloud" src="assets/cloud-4.webp" alt="" width="410" height="246" style="--x: 64%; --y: 6%; --w: 32vw; --d: 0.8;">
+      <img class="intro-cloud" src="assets/cloud-2.webp" alt="" width="237" height="196" style="--x: 76%; --y: 64%; --w: 20vw; --d: 0.35;">
+      <img class="intro-cloud" src="assets/cloud-3.webp" alt="" width="347" height="216" style="--x: -6%; --y: 70%; --w: 30vw; --d: 0.65;">
+      <img class="intro-cloud" src="assets/cloud-1.webp" alt="" width="429" height="211" style="--x: 30%; --y: -50%; --w: 42vw; --d: 1;">
+      <img class="intro-cloud" src="assets/cloud-4.webp" alt="" width="410" height="246" style="--x: -12%; --y: -85%; --w: 50vw; --d: 1.15;">
+      <img class="intro-cloud" src="assets/cloud-3.webp" alt="" width="347" height="216" style="--x: 56%; --y: -115%; --w: 46vw; --d: 1.1;">
+      <img class="intro-cloud" src="assets/cloud-2.webp" alt="" width="237" height="196" style="--x: 18%; --y: -150%; --w: 60vw; --d: 1.3;">
+    </div>
+
+    <!-- Flight ticket line: DGS = Daniela's initials, PUE = Puebla airport code -->
+    <p class="intro-ticket" aria-hidden="true"><span class="ticket-flt" data-i18n="intro.flt">FLT</span> DGS-01 · PUE → <span data-i18n="intro.cloud">CLOUD</span><span class="ticket-year"> · 2026</span></p>
+
+    <div class="intro-lang lang-switch" role="group" aria-label="Language" data-i18n-aria="lang.group">
+      <button type="button" class="pill-toggle" data-lang="en" aria-pressed="true" lang="en">EN</button>
+      <button type="button" class="pill-toggle" data-lang="es" aria-pressed="false" lang="es">ES</button>
+    </div>
+
+    <div class="intro-stage">
+      <!-- Big record: spins with music, then flies to the corner and becomes the music button -->
+      <div class="intro-record" id="intro-record" aria-hidden="true">
+        <svg viewBox="0 0 64 64">
+          <circle class="v-disc" cx="32" cy="32" r="30"/>
+          <circle class="v-groove" cx="32" cy="32" r="25"/>
+          <circle class="v-groove" cx="32" cy="32" r="20.5"/>
+          <circle class="v-groove" cx="32" cy="32" r="16"/>
+          <path class="v-shine" d="M14 20a22 22 0 0 1 12-9"/>
+          <circle class="v-label" cx="32" cy="32" r="10"/>
+          <circle class="v-dot" cx="36.5" cy="27.5" r="1.6"/>
+        </svg>
+      </div>
+      <p class="intro-mark" id="intro-mark">Flight Log</p>
+      <div class="intro-swap">
+        <div class="intro-loading">
+          <p class="intro-label" id="intro-label" data-i18n="intro.preparing">Preparing for takeoff</p>
+          <div class="intro-track" aria-hidden="true">
+            <svg class="icon intro-track-plane" id="intro-track-plane"><use href="#i-plane"/></svg>
+          </div>
+          <p class="intro-count" role="progressbar" aria-labelledby="intro-label"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="intro-progress"><span id="intro-count">0</span>%</p>
+        </div>
+        <div class="intro-choice">
+          <button type="button" class="btn btn-primary" id="board-music" data-i18n="intro.music">Board with music ♪</button>
+          <button type="button" class="btn btn-secondary" id="board-silent" data-i18n="intro.silent">Board in silence</button>
+          <p class="intro-hint">
+            <svg class="icon" aria-hidden="true"><use href="#i-headphones"/></svg>
+            <span data-i18n="intro.headphones">Best with headphones</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p class="intro-cabin" data-i18n="intro.cabin">Seatbelt on. We take off when you're ready.</p>
+  </div>
+
+  <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#takeoff">
+        <img src="assets/favicon.png" alt="" width="32" height="32">
+        <span>Daniela</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main">
+        <ul id="nav-list" class="nav-list">
+          <li><a href="#about" data-i18n="nav.about">About</a></li>
+          <li><a href="#skills" data-i18n="nav.skills">Skills</a></li>
+          <li><a href="#projects" data-i18n="nav.projects">Projects</a></li>
+          <li><a href="#mini-game" data-i18n="nav.game">Mini-game</a></li>
+          <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-tools">
+        <div class="lang-switch" role="group" aria-label="Language" data-i18n-aria="lang.group">
+          <button type="button" class="pill-toggle" data-lang="en" aria-pressed="true" lang="en">EN</button>
+          <button type="button" class="pill-toggle" data-lang="es" aria-pressed="false" lang="es">ES</button>
+        </div>
+        <button type="button" class="pill-toggle theme-toggle" id="theme-toggle" aria-pressed="false">
+          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+          <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+          <span class="theme-label" data-i18n="theme">Night flight</span>
+        </button>
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="nav-list">
+          <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
+          <svg class="icon icon-close" aria-hidden="true"><use href="#i-close"/></svg>
+          <span class="visually-hidden" data-i18n="menu">Menu</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Dotted flight trail, drawn by script.js as you scroll -->
+    <svg class="trail" aria-hidden="true" focusable="false">
+      <defs>
+        <mask id="trail-mask" maskUnits="userSpaceOnUse">
+          <path class="trail-reveal"/>
+        </mask>
+      </defs>
+      <path class="trail-dots" mask="url(#trail-mask)"/>
+      <g class="trail-plane"><use href="#i-plane" width="26" height="26" x="-13" y="-13"/></g>
+    </svg>
+
+    <!-- 1. Takeoff -->
+    <section class="hero" id="takeoff" aria-labelledby="hero-title">
+      <div class="sky" aria-hidden="true">
+        <div class="cloud-layer" data-depth="0.12" style="--x: 6%; --y: 18%; --w: 150px;"><img src="assets/cloud-2.webp" alt="" width="237" height="196"></div>
+        <div class="cloud-layer" data-depth="0.3" style="--x: 58%; --y: 8%; --w: 220px;"><img src="assets/cloud-1.webp" alt="" width="429" height="211"></div>
+        <div class="cloud-layer" data-depth="0.5" style="--x: 80%; --y: 70%; --w: 260px;"><img src="assets/cloud-4.webp" alt="" width="410" height="246"></div>
+        <div class="cloud-layer" data-depth="0.22" style="--x: -4%; --y: 78%; --w: 200px;"><img src="assets/cloud-3.webp" alt="" width="347" height="216"></div>
+      </div>
+
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <h1 id="hero-title" class="hero-title" data-i18n="hero.title">Hi, I'm Daniela Gabriel Suárez.</h1>
+          <p class="hero-tagline" data-i18n="hero.tagline">Accounting student learning to take care of money in the cloud.</p>
+          <p class="hero-meta" data-i18n="hero.meta">Future FinOps · AWS learner · UTTECAM</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#projects" data-i18n="hero.cta">See my flight log</a>
+            <a class="btn btn-secondary btn-hint" href="#mini-game" data-i18n="hero.hint">Can you take off on budget? ✈</a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="plane-entry">
+            <img class="plane-float" src="assets/hero-plane.webp" width="692" height="452" fetchpriority="high"
+                 alt="Cartoon of Daniela waving from the cockpit of a yellow and white biplane, her red scarf flying in the wind."
+                 data-i18n-alt="hero.alt">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. About me -->
+    <section class="section" id="about" aria-labelledby="about-title">
+      <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
+      <div class="sky-spot">
+        <p class="sky-hint" id="sky-hint"><span class="sky-hint-text">Tap a cloud ☁</span> · <span class="sky-count">0/5</span></p>
+        <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-5"
+                aria-label="Pop this cloud to reveal a fun fact" data-i18n-aria="clouds.label">
+          <img src="assets/cloud-2.webp" alt="" width="237" height="196" loading="lazy">
+        </button>
+        <div class="fact-card" id="fact-5" tabindex="-1" hidden>
+          <p class="fact-kicker" data-i18n="clouds.kicker">Fun fact</p>
+          <p class="fact-text" data-i18n="fact.5">FinOps joins finance and engineering: every team takes ownership of what it spends in the cloud.</p>
+          <button type="button" class="fact-close" aria-label="Close" data-i18n-aria="clouds.close">
+            <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="container">
+        <header class="section-head reveal">
+          <h2 id="about-title" data-i18n="about.title">The Pilot</h2>
+          <p class="section-sub" data-i18n="about.sub">About me</p>
+        </header>
+
+        <article class="license reveal" aria-label="Pilot license" data-i18n-aria="about.license">
+          <div class="license-photo">
+            <img src="assets/face.webp" width="320" height="422" loading="lazy"
+                 alt="Cartoon portrait of Daniela smiling, wearing a brown aviator cap with goggles."
+                 data-i18n-alt="about.alt">
+          </div>
+          <div class="license-body">
+            <p class="license-heading" data-i18n="about.licenseTitle">Pilot license</p>
+            <dl class="license-fields">
+              <div><dt data-i18n="about.f.name">Name</dt><dd>Daniela Gabriel Suárez</dd></div>
+              <div><dt data-i18n="about.f.study">Studying</dt><dd data-i18n="about.v.study">Accounting</dd></div>
+              <div><dt data-i18n="about.f.school">School</dt><dd>UTTECAM</dd></div>
+              <div><dt data-i18n="about.f.base">Base</dt><dd data-i18n="about.v.base">Puebla, Mexico</dd></div>
+              <div class="field-heading"><dt data-i18n="about.f.heading">Heading</dt><dd>FinOps</dd></div>
+            </dl>
+            <p class="license-text" data-i18n="about.text">I study Accounting at Universidad Tecnológica de Tecamachalco (UTTECAM) in Puebla, Mexico. I discovered FinOps through conversations and recommendations. I had never heard of it, and it caught my attention right away: as a future accountant, it gives me new skills, and I love reducing costs and building budgets. That's why I'm about 80% sure FinOps is my path.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 3. Skills -->
+    <section class="section" id="skills" aria-labelledby="skills-title">
+      <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
+      <div class="sky-spot">
+        <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-2"
+                aria-label="Pop this cloud to reveal a fun fact" data-i18n-aria="clouds.label">
+          <img src="assets/cloud-1.webp" alt="" width="429" height="211" loading="lazy">
+        </button>
+        <div class="fact-card" id="fact-2" tabindex="-1" hidden>
+          <p class="fact-kicker" data-i18n="clouds.kicker">Fun fact</p>
+          <p class="fact-text" data-i18n="fact.2">My favorite AWS topic so far is Amazon EC2: servers in the cloud.</p>
+          <button type="button" class="fact-close" aria-label="Close" data-i18n-aria="clouds.close">
+            <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="container">
+        <header class="section-head reveal">
+          <h2 id="skills-title" data-i18n="skills.title">Cockpit instruments</h2>
+          <p class="section-sub" data-i18n="skills.sub">Skills</p>
+        </header>
+
+        <div class="skills-layout">
+          <figure class="skills-art reveal">
+            <img src="assets/skills.webp" width="640" height="642" loading="lazy"
+                 alt="Cartoon of Daniela at a desk using a laptop and a calculator next to a chart with a small cloud."
+                 data-i18n-alt="skills.alt">
+          </figure>
+
+          <div class="panel reveal">
+            <ul class="legend" aria-label="What the dials mean" data-i18n-aria="skills.legendLabel">
+              <li><span class="legend-swatch is-using" aria-hidden="true"></span><span data-i18n="skills.using">Using it</span></li>
+              <li><span class="legend-swatch is-learning" aria-hidden="true"></span><span data-i18n="skills.learning">Learning</span></li>
+            </ul>
+            <ul class="gauges">
+              <li class="gauge is-using">
+                <svg class="dial" viewBox="0 0 120 70" aria-hidden="true"><use href="#dial"/><g class="needle"><line x1="60" y1="62" x2="60" y2="22"/><circle cx="60" cy="62" r="5"/></g></svg>
+                <h3 data-i18n="skills.s1">Accounting &amp; financial statements</h3>
+                <p class="gauge-status" data-i18n="skills.using">Using it</p>
+              </li>
+              <li class="gauge is-using">
+                <svg class="dial" viewBox="0 0 120 70" aria-hidden="true"><use href="#dial"/><g class="needle"><line x1="60" y1="62" x2="60" y2="22"/><circle cx="60" cy="62" r="5"/></g></svg>
+                <h3 data-i18n="skills.s2">Budgeting &amp; cost reduction</h3>
+                <p class="gauge-status" data-i18n="skills.using">Using it</p>
+              </li>
+              <li class="gauge is-using">
+                <svg class="dial" viewBox="0 0 120 70" aria-hidden="true"><use href="#dial"/><g class="needle"><line x1="60" y1="62" x2="60" y2="22"/><circle cx="60" cy="62" r="5"/></g></svg>
+                <h3 data-i18n="skills.s3">Sales &amp; customer service</h3>
+                <p class="gauge-status" data-i18n="skills.using">Using it</p>
+              </li>
+              <li class="gauge is-using">
+                <svg class="dial" viewBox="0 0 120 70" aria-hidden="true"><use href="#dial"/><g class="needle"><line x1="60" y1="62" x2="60" y2="22"/><circle cx="60" cy="62" r="5"/></g></svg>
+                <h3 data-i18n="skills.s4">Spreadsheets (Excel / Google Sheets)</h3>
+                <p class="gauge-status" data-i18n="skills.using">Using it</p>
+              </li>
+              <li class="gauge is-learning">
+                <svg class="dial" viewBox="0 0 120 70" aria-hidden="true"><use href="#dial"/><g class="needle"><line x1="60" y1="62" x2="60" y2="22"/><circle cx="60" cy="62" r="5"/></g></svg>
+                <h3 data-i18n="skills.s5">AWS Cloud fundamentals</h3>
+                <p class="gauge-status" data-i18n="skills.learning">Learning</p>
+              </li>
+              <li class="gauge is-learning">
+                <svg class="dial" viewBox="0 0 120 70" aria-hidden="true"><use href="#dial"/><g class="needle"><line x1="60" y1="62" x2="60" y2="22"/><circle cx="60" cy="62" r="5"/></g></svg>
+                <h3>FinOps</h3>
+                <p class="gauge-status" data-i18n="skills.learning">Learning</p>
+              </li>
+              <li class="gauge is-learning">
+                <svg class="dial" viewBox="0 0 120 70" aria-hidden="true"><use href="#dial"/><g class="needle"><line x1="60" y1="62" x2="60" y2="22"/><circle cx="60" cy="62" r="5"/></g></svg>
+                <h3 data-i18n="skills.s7">English</h3>
+                <p class="gauge-status" data-i18n="skills.learning">Learning</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Projects -->
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
+      <div class="sky-spot">
+        <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-1"
+                aria-label="Pop this cloud to reveal a fun fact" data-i18n-aria="clouds.label">
+          <img src="assets/cloud-4.webp" alt="" width="410" height="246" loading="lazy">
+        </button>
+        <div class="fact-card" id="fact-1" tabindex="-1" hidden>
+          <p class="fact-kicker" data-i18n="clouds.kicker">Fun fact</p>
+          <p class="fact-text" data-i18n="fact.1">I've completed 10 of 12 Cloud Practitioner assignments in AWS Cloud Quest.</p>
+          <button type="button" class="fact-close" aria-label="Close" data-i18n-aria="clouds.close">
+            <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="container">
+        <header class="section-head reveal">
+          <h2 id="projects-title" data-i18n="projects.title">Flight log</h2>
+          <p class="section-sub" data-i18n="projects.sub">Projects</p>
+        </header>
+
+        <ol class="logbook">
+          <!-- 4.1 AWS Cloud Quest -->
+          <li class="entry reveal">
+            <div class="entry-head">
+              <h3 data-i18n="p1.title">AWS Cloud Quest</h3>
+              <span class="stamp" data-i18n="p1.stamp">In progress</span>
+            </div>
+            <dl class="entry-parts">
+              <div><dt data-i18n="parts.what">What it is</dt><dd data-i18n="p1.what">I'm learning AWS through Cloud Quest, a hands-on game with real labs.</dd></div>
+              <div>
+                <dt data-i18n="parts.mine">What I did</dt>
+                <dd>
+                  <ul class="stats">
+                    <li><strong>7</strong> <span data-i18n="p1.builder">Builder level</span></li>
+                    <li><strong>16</strong> <span data-i18n="p1.reputation">Reputation level</span></li>
+                  </ul>
+                  <div class="progress">
+                    <div class="progress-label">
+                      <span data-i18n="p1.cp">Cloud Practitioner role</span>
+                      <span data-i18n="p1.cpCount">10 of 12 assignments</span>
+                    </div>
+                    <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="12" aria-valuenow="10"
+                         aria-label="Cloud Practitioner assignments completed" data-i18n-aria="p1.cpAria">
+                      <div class="progress-fill" style="--p: 0.8333"></div>
+                    </div>
+                  </div>
+                  <p class="also" data-i18n="p1.also">Also making progress in:</p>
+                  <ul class="chips">
+                    <li>Solutions Architect</li><li>Serverless</li><li>Data Analytics</li><li>Networking</li>
+                    <li>Security</li><li>Machine Learning</li><li>Generative AI</li>
+                  </ul>
+                </dd>
+              </div>
+              <div><dt data-i18n="parts.learned">What I learned</dt><dd data-i18n="p1.learned">The topic that stood out most to me was Amazon EC2. I learned how servers are used in the cloud today.</dd></div>
+            </dl>
+            <a class="entry-link" href="https://aws.amazon.com/training/digital/aws-cloud-quest/" target="_blank" rel="noopener">
+              <span data-i18n="p1.link">About AWS Cloud Quest</span>
+              <svg class="icon" aria-hidden="true"><use href="#i-external"/></svg>
+              <span class="visually-hidden" data-i18n="newTab">(opens in a new tab)</span>
+            </a>
+          </li>
+
+          <!-- 4.2 Chok Chok Skincare -->
+          <li class="entry reveal">
+            <div class="entry-head">
+              <h3>Chok Chok Skincare</h3>
+              <span class="stamp" data-i18n="p2.stamp">My business</span>
+            </div>
+            <dl class="entry-parts">
+              <div><dt data-i18n="parts.what">What it is</dt><dd data-i18n="p2.what">My own skincare micro-business.</dd></div>
+              <div><dt data-i18n="parts.mine">What I did</dt><dd data-i18n="p2.mine">I handle purchasing, pricing, sales and profit, and track inventory and sales in a spreadsheet.</dd></div>
+              <div><dt data-i18n="parts.why">Why it matters</dt><dd data-i18n="p2.why">It's FinOps on a small scale: real costs, margins and budgets.</dd></div>
+              <div><dt data-i18n="parts.learned">What I learned</dt><dd data-i18n="p2.learned">I learned to calculate how much we earn per unit. I also keep better records of the products that come in and go out.</dd></div>
+            </dl>
+            <p class="entry-link is-soon" data-i18n="p2.soon">Website coming soon</p>
+          </li>
+
+          <!-- 4.4 This portfolio's cost -->
+          <li class="entry reveal">
+            <div class="entry-head">
+              <h3 data-i18n="p3.title">This portfolio's cost</h3>
+              <span class="stamp" data-i18n="p3.stamp">Budget: $1 / month</span>
+            </div>
+            <dl class="entry-parts">
+              <div><dt data-i18n="parts.what">What it is</dt><dd data-i18n="p3.what">This site runs on AWS Amplify. I set a monthly budget alert so I always know what it costs.</dd></div>
+              <div><dt data-i18n="parts.mine">What I did</dt><dd data-i18n="p3.mine">Built it with HTML, CSS and JavaScript, hosted it on AWS Amplify Hosting and created a $1 monthly budget in AWS Budgets.</dd></div>
+              <div><dt data-i18n="parts.learned">What I learned</dt><dd data-i18n="p3.learned">I learned the steps to publish a website on AWS Amplify and set up a budget in AWS Budgets. Now I have an idea of how much I could spend if I rent a cloud service like this.</dd></div>
+            </dl>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 5. Fun fact: mini-game -->
+    <section class="section game-section" id="mini-game" aria-labelledby="game-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <h2 id="game-title" data-i18n="game.title">Take off on budget</h2>
+          <p class="section-sub" data-i18n="game.sub">Mini-game with a fun fact at the end</p>
+          <button type="button" class="help-btn" id="safety-open" aria-controls="safety">
+            <span class="help-mark" aria-hidden="true">?</span>
+            <span data-i18n="safety.open">How to play</span>
+          </button>
+        </header>
+
+        <div class="game reveal" id="game" data-state="idle">
+          <!-- Safety card: how to play, before the mini-game. Opened by script.js once per visit. -->
+          <div class="safety" id="safety" role="dialog" aria-labelledby="safety-title" hidden>
+            <div class="safety-card">
+              <div class="safety-top">
+                <p class="safety-title" id="safety-title" data-i18n="safety.title">Safety instructions</p>
+                <button type="button" class="safety-skip" id="safety-skip">
+                  <span data-i18n="safety.skip">Skip</span>
+                  <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+                </button>
+              </div>
+              <ol class="safety-steps">
+            <li class="safety-step" data-step="0">
+              <div class="safety-pic" aria-hidden="true"><span class="safety-num">1</span><svg class="icon"><use href="#i-crate"/></svg></div>
+              <h3 data-i18n="safety.s1t">Load the cargo</h3>
+              <p data-i18n="safety.s1">Tap a box (or drag it) to put it on the plane. Tap it again to take it off.</p>
+            </li>
+            <li class="safety-step" data-step="1" hidden>
+              <div class="safety-pic" aria-hidden="true"><span class="safety-num">2</span><svg class="icon"><use href="#i-gauge"/></svg></div>
+              <h3 data-i18n="safety.s2t">Watch the fuel gauge</h3>
+              <p data-i18n="safety.s2">The monthly cost must stay under $5.</p>
+            </li>
+            <li class="safety-step" data-step="2" hidden>
+              <div class="safety-pic" aria-hidden="true"><span class="safety-num">3</span><svg class="icon"><use href="#i-nowaste"/></svg></div>
+              <h3 data-i18n="safety.s3t">No waste on board</h3>
+              <p data-i18n="safety.s3">Some boxes look useful but are waste. Just one keeps you on the ground.</p>
+            </li>
+            <li class="safety-step" data-step="3" hidden>
+              <div class="safety-pic" aria-hidden="true"><span class="safety-num">4</span><svg class="icon"><use href="#i-plane"/></svg></div>
+              <h3 data-i18n="safety.s4t">Take off!</h3>
+              <p data-i18n="safety.s4">When you have only what you need, press Take off!</p>
+            </li>
+              </ol>
+              <div class="safety-nav">
+                <div class="safety-dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+                <p class="visually-hidden" id="safety-status" aria-live="polite"></p>
+                <div class="safety-buttons">
+                  <button type="button" class="btn btn-secondary" id="safety-back" data-i18n="safety.back">Back</button>
+                  <button type="button" class="btn btn-primary" id="safety-next">Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="game-brief">
+            <p class="mission" data-i18n="game.mission">Mission: get Daniela's portfolio online for less than $5/month.</p>
+            <p class="game-help" data-i18n="game.help">Tap the cargo you want on board, or drag it to the plane. Then press Take off!</p>
+            <p class="disclaimer" data-i18n="game.disclaimer">Prices are illustrative.</p>
+          </div>
+
+          <div class="game-board">
+            <ul class="cargo" aria-label="Cargo" data-i18n-aria="game.cargoLabel">
+              <li><button type="button" class="crate" data-id="hosting" data-cost="1" aria-pressed="false" draggable="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg>
+                <span class="crate-name" data-i18n="c.hosting">Website hosting (Amplify)</span>
+                <span class="crate-cost">$1</span></button></li>
+              <li><button type="button" class="crate" data-id="bigserver" data-cost="3.5" data-trap="true" aria-pressed="false" draggable="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>
+                <span class="crate-name" data-i18n="c.bigserver">Huge server running 24/7</span>
+                <span class="crate-cost">$3.50</span></button></li>
+              <li><button type="button" class="crate" data-id="domain" data-cost="1" aria-pressed="false" draggable="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>
+                <span class="crate-name" data-i18n="c.domain">Domain &amp; HTTPS</span>
+                <span class="crate-cost">$1</span></button></li>
+              <li><button type="button" class="crate" data-id="chatbot" data-cost="2" data-trap="true" aria-pressed="false" draggable="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>
+                <span class="crate-name" data-i18n="c.chatbot">AI chatbot</span>
+                <span class="crate-cost">$2</span></button></li>
+              <li><button type="button" class="crate" data-id="alert" data-cost="0" aria-pressed="false" draggable="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg>
+                <span class="crate-name" data-i18n="c.alert">Budget alert</span>
+                <span class="crate-cost">$0</span></button></li>
+              <li><button type="button" class="crate" data-id="idledb" data-cost="1.5" data-trap="true" aria-pressed="false" draggable="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-database"/></svg>
+                <span class="crate-name" data-i18n="c.idledb">Idle database nobody uses</span>
+                <span class="crate-cost">$1.50</span></button></li>
+              <li><button type="button" class="crate" data-id="images" data-cost="0.5" aria-pressed="false" draggable="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>
+                <span class="crate-name" data-i18n="c.images">Image storage</span>
+                <span class="crate-cost">$0.50</span></button></li>
+              <li><button type="button" class="crate" data-id="testserver" data-cost="0.8" data-trap="true" aria-pressed="false" draggable="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-flask"/></svg>
+                <span class="crate-name" data-i18n="c.testserver">Forgotten test server</span>
+                <span class="crate-cost">$0.80</span></button></li>
+            </ul>
+
+            <div class="runway-panel">
+              <div class="fuel">
+                <div class="fuel-label">
+                  <span data-i18n="game.fuel">Monthly cost</span>
+                  <span class="fuel-value" id="fuel-value">$0.00 / $5.00</span>
+                </div>
+                <div class="fuel-track" id="fuel-meter" role="meter" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"
+                     aria-label="Monthly cost against the $5 budget" data-i18n-aria="game.fuelAria">
+                  <div class="fuel-fill" id="fuel-fill"></div>
+                  <div class="fuel-limit" aria-hidden="true"></div>
+                </div>
+              </div>
+
+              <div class="runway" id="dropzone">
+                <div class="game-plane" id="game-plane">
+                  <img src="assets/plane.webp" width="692" height="452" loading="lazy"
+                       alt="Empty yellow and white biplane waiting on the runway." data-i18n-alt="game.planeAlt">
+                </div>
+                <p class="onboard-empty" id="onboard-empty" data-i18n="game.empty">Nothing on board yet.</p>
+                <ul class="onboard" id="onboard" aria-label="On board" data-i18n-aria="game.onboardLabel"></ul>
+              </div>
+
+              <div class="game-actions">
+                <button type="button" class="btn btn-primary" id="takeoff-btn" data-i18n="game.takeoff">Take off!</button>
+                <button type="button" class="btn btn-secondary" id="reset-btn" data-i18n="game.reset">Try again</button>
+              </div>
+
+              <div class="result" id="result" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Carry-on -->
+    <section class="section" id="carry-on" aria-labelledby="carry-title">
+      <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
+      <div class="sky-spot">
+        <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-3"
+                aria-label="Pop this cloud to reveal a fun fact" data-i18n-aria="clouds.label">
+          <img src="assets/cloud-3.webp" alt="" width="347" height="216" loading="lazy">
+        </button>
+        <div class="fact-card" id="fact-3" tabindex="-1" hidden>
+          <p class="fact-kicker" data-i18n="clouds.kicker">Fun fact</p>
+          <p class="fact-text" data-i18n="fact.3">At Chok Chok, I calculate how much we earn per unit.</p>
+          <button type="button" class="fact-close" aria-label="Close" data-i18n-aria="clouds.close">
+            <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="container">
+        <header class="section-head reveal">
+          <h2 id="carry-title" data-i18n="carry.title">Carry-on</h2>
+          <p class="section-sub" data-i18n="carry.sub">What makes me, me</p>
+        </header>
+
+        <ul class="tags">
+          <li class="tag reveal">
+            <!-- TODO: replace with assets/plushie.webp when Nani sends the new image -->
+            <div class="tag-art is-placeholder">
+              <img src="assets/cloud-2.webp" width="237" height="196" alt="" loading="lazy">
+              <span data-i18n="carry.soon">Photo coming soon</span>
+            </div>
+            <h3 data-i18n="carry.t1">Plushies</h3>
+            <p data-i18n="carry.d1">I love plushies. My favorite is one my dad gave me on my 7th birthday.</p>
+          </li>
+          <li class="tag reveal">
+            <div class="tag-art">
+              <img src="assets/soccer.webp" width="620" height="736" loading="lazy"
+                   alt="Cartoon of Daniela kicking a soccer ball on the grass." data-i18n-alt="carry.a2">
+            </div>
+            <h3 data-i18n="carry.t2">Soccer</h3>
+            <p data-i18n="carry.d2">I play soccer as a center midfielder.</p>
+          </li>
+          <li class="tag reveal">
+            <!-- TODO: replace with assets/skincare.webp when Nani sends the new image -->
+            <div class="tag-art is-placeholder">
+              <img src="assets/cloud-3.webp" width="347" height="216" alt="" loading="lazy">
+              <span data-i18n="carry.soon">Photo coming soon</span>
+            </div>
+            <h3>Skincare</h3>
+            <p data-i18n="carry.d3">Skincare is my self-care ritual — it's how my business started.</p>
+          </li>
+          <li class="tag reveal">
+            <div class="tag-art">
+              <img src="assets/music.webp" width="485" height="616" loading="lazy"
+                   alt="Cartoon of Daniela with her eyes closed, listening to music on headphones, surrounded by music notes." data-i18n-alt="carry.a4">
+            </div>
+            <h3 data-i18n="carry.t4">Music</h3>
+            <p data-i18n="carry.d4">I love music for its lyrics. My favorite band is Cuarteto de Nos. Their song "El aprendiz" reminds me that hard moments turn into lessons.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Control tower -->
+    <section class="section" id="contact" aria-labelledby="contact-title">
+      <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
+      <div class="sky-spot">
+        <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-4"
+                aria-label="Pop this cloud to reveal a fun fact" data-i18n-aria="clouds.label">
+          <img src="assets/cloud-2.webp" alt="" width="237" height="196" loading="lazy">
+        </button>
+        <div class="fact-card" id="fact-4" tabindex="-1" hidden>
+          <p class="fact-kicker" data-i18n="clouds.kicker">Fun fact</p>
+          <p class="fact-text" data-i18n="fact.4">This website has a $1 monthly budget alert in AWS Budgets.</p>
+          <button type="button" class="fact-close" aria-label="Close" data-i18n-aria="clouds.close">
+            <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="container">
+        <header class="section-head reveal">
+          <h2 id="contact-title" data-i18n="contact.title">Control tower</h2>
+          <p class="section-sub" data-i18n="contact.sub">Contact</p>
+        </header>
+
+        <div class="pass reveal">
+          <div class="pass-main">
+            <div class="pass-route">
+              <div><span class="pass-field" data-i18n="contact.from">From</span><span class="pass-value">Puebla, MX</span></div>
+              <svg class="icon pass-plane" aria-hidden="true"><use href="#i-plane"/></svg>
+              <div><span class="pass-field" data-i18n="contact.to">To</span><span class="pass-value">FinOps</span></div>
+            </div>
+            <p class="pass-message" data-i18n="contact.message">Let's talk about budgets, cloud or skincare!</p>
+            <img class="pass-art" src="assets/nani-wave.webp" width="589" height="407" loading="lazy"
+                 alt="Cartoon of Daniela in her aviator cap, smiling and waving." data-i18n-alt="contact.alt">
+          </div>
+          <div class="pass-stub">
+            <span class="pass-field" data-i18n="contact.passenger">Passenger</span>
+            <span class="pass-value">Daniela Gabriel Suárez</span>
+            <a class="btn btn-primary" href="mailto:dangabriel212007@gmail.com">
+              <svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>
+              <span data-i18n="contact.email">Email me</span>
+            </a>
+            <!-- TODO: add Nani's AWS Builder Center profile URL, then uncomment
+            <a class="btn btn-secondary" href="TODO" target="_blank" rel="noopener">
+              <span data-i18n="contact.builder">AWS Builder Center</span>
+              <span class="visually-hidden" data-i18n="newTab">(opens in a new tab)</span>
+            </a>
+            -->
+            <!-- TODO: add the GitHub link once the repository exists, then uncomment
+            <a class="btn btn-secondary" href="https://github.com/TODO" target="_blank" rel="noopener">
+              <span>GitHub</span>
+              <span class="visually-hidden" data-i18n="newTab">(opens in a new tab)</span>
+            </a>
+            -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p data-i18n="footer">© 2026 Daniela Gabriel Suárez · Built with HTML, CSS &amp; JS · Hosted on AWS Amplify</p>
+      <p class="credit" data-i18n="credit">Music: “Infinity Love” by Luminewave (Pixabay)</p>
+    </div>
+  </footer>
+
+  <!-- Music: a small vinyl that plays and pauses the song. The file only downloads when asked for. -->
+  <button type="button" class="vinyl" id="vinyl" aria-pressed="false" aria-label="Background music" data-i18n-aria="music.label">
+    <svg class="vinyl-disc" viewBox="0 0 64 64" aria-hidden="true">
+      <circle class="v-disc" cx="32" cy="32" r="30"/>
+      <circle class="v-groove" cx="32" cy="32" r="25"/>
+      <circle class="v-groove" cx="32" cy="32" r="20.5"/>
+      <circle class="v-groove" cx="32" cy="32" r="16"/>
+      <path class="v-shine" d="M14 20a22 22 0 0 1 12-9"/>
+      <circle class="v-label" cx="32" cy="32" r="10"/>
+      <circle class="v-dot" cx="36.5" cy="27.5" r="1.6"/>
+    </svg>
+    <svg class="vinyl-state" viewBox="0 0 24 24" aria-hidden="true">
+      <path class="v-play" d="M9.5 7.5v9l7-4.5z"/>
+      <path class="v-pause" d="M9 7.5v9M15 7.5v9"/>
+    </svg>
+  </button>
+  <audio id="music" src="assets/music.mp3" preload="none" loop></audio>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
