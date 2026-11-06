@@ -119,6 +119,8 @@
     'carry.soon': 'Foto próximamente',
     'carry.t1': 'Peluches',
     'carry.d1': 'Amo los peluches. Mi favorito es uno que me regaló mi papá en mi cumpleaños número 7.',
+    'carry.a1': 'Caricatura de Daniela abrazando a su perrito de peluche grande y a un osito.',
+    'carry.a3': 'Caricatura de Daniela con bata rosa y mascarilla verde, con una rodaja de pepino junto a sus productos de skincare.',
     'carry.t2': 'Fútbol',
     'carry.a2': 'Caricatura de Daniela pateando un balón de fútbol en el pasto.',
     'carry.d2': 'Juego fútbol de medio centro.',
@@ -259,29 +261,7 @@
   }
   langButtons.forEach((b) => b.addEventListener('click', () => applyLang(b.dataset.lang, true)));
 
-  /* =====================================================================
-     Night flight
-     ===================================================================== */
-  const themeToggle = $('#theme-toggle');
-  const themeMeta = $('meta[name="theme-color"]');
-
-  const isNight = () => {
-    const picked = root.dataset.theme;
-    return picked ? picked === 'night' : systemDark.matches;
-  };
-  function syncThemeUI() {
-    const night = isNight();
-    themeToggle.setAttribute('aria-pressed', String(night));
-    if (themeMeta) themeMeta.setAttribute('content', night ? '#0F1E33' : '#BFE3F5');
-  }
-  themeToggle.addEventListener('click', () => {
-    const next = isNight() ? 'day' : 'night';
-    const apply = () => { root.dataset.theme = next; store.set('theme', next); syncThemeUI(); };
-    if (document.startViewTransition && !reduceMotion.matches) document.startViewTransition(apply);
-    else apply();
-  });
-  systemDark.addEventListener('change', syncThemeUI);
-  syncThemeUI();
+  // Day/night is no longer a button: the scroll decides the sky (see "Scroll scene" below).
 
   /* =====================================================================
      Mobile menu
@@ -405,7 +385,7 @@
   function onScroll() {
     if (ticking) return;
     ticking = true;
-    requestAnimationFrame(() => { drawClouds(); drawTrail(); drawPortholes(); ticking = false; });
+    requestAnimationFrame(() => { drawClouds(); drawTrail(); scene.draw(); ticking = false; });
   }
   window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -413,7 +393,7 @@
   function rebuild() {
     if (rebuildQueued) return;
     rebuildQueued = true;
-    requestAnimationFrame(() => { buildTrail(); drawTrail(); rebuildQueued = false; });
+    requestAnimationFrame(() => { buildTrail(); drawTrail(); scene.measure(); scene.draw(); rebuildQueued = false; });
   }
   if ('ResizeObserver' in window) new ResizeObserver(rebuild).observe(main);
   window.addEventListener('resize', rebuild);
@@ -1093,30 +1073,184 @@
   })();
 
   /* =====================================================================
-     Porthole: big blocks open like an airplane window as they scroll in
+     Scroll scene: sky dawn → day → sunset → night, clouds between sections,
+     the airplane window on #projects and the header's day/night tokens.
+     Driven by the single scroll listener above (onScroll → rAF → scene.draw).
      ===================================================================== */
-  const portholes = reduceMotion.matches ? [] : $$('.license, .panel, .entry, .game, .tags, .pass')
-    .map((el) => { el.classList.add('porthole'); return { el, open: false }; });
+  const scene = (() => {
+    const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
+    const sky = $('.sky-scene');
+    const stars = $('.sky-stars');
+    const header = $('.site-header');
+    const nightBlocks = $$('[data-sky="night"]');
+    const gates = $$('.cloud-gate').map((el) => ({ el, left: $('.gate-left', el), right: $('.gate-right', el), w: 0 }));
+    const track = $('.window-track');
+    const wall = $('.window-wall');
+    const hole = $('.window-hole');
+    const windowQuery = window.matchMedia('(min-width: 768px)');
 
-  function drawPortholes() {
-    if (!portholes.length) return;
-    const vh = window.innerHeight;
-    for (const p of portholes) {
-      if (p.open) continue;
-      const r = p.el.getBoundingClientRect();
-      const t = Math.min(Math.max((vh - r.top) / (vh * 0.55), 0), 1);
-      if (t >= 1) {
-        p.open = true; // once open, it stays open while you read
-        p.el.style.clipPath = '';
-        continue;
+    let keys = [];           // [scrollY, [dawn, day, dusk, night]]
+    let starsFrom = 0;
+    let starsTo = 1;
+    let maxScale = 3.4;
+    let headerNight = null;
+
+    // Seeded random so the stars don't jump around when the canvas is redrawn
+    function drawStars() {
+      if (!stars) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      stars.width = Math.round(w * dpr);
+      stars.height = Math.round(h * dpr);
+      const ctx = stars.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      let seed = 7;
+      const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+      const count = Math.round((w * h) / 7000);
+      for (let i = 0; i < count; i++) {
+        const x = rand() * w;
+        const y = rand() * h * 0.9;
+        const r = rand() < 0.08 ? 1.6 : 0.6 + rand() * 0.7;
+        ctx.globalAlpha = 0.45 + rand() * 0.55;
+        ctx.fillStyle = rand() < 0.3 ? '#FFE58A' : '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
       }
-      const k = 1 - (1 - (1 - t) ** 3); // remaining "closedness", eased out
-      const side = r.width * 0.3 * k;
-      const vert = Math.min(r.height * 0.12, 90) * k;
-      const radius = (Math.min(r.width - side * 2, r.height - vert * 2) / 2) * k + 16 * (1 - k);
-      p.el.style.clipPath = `inset(${vert.toFixed(1)}px ${side.toFixed(1)}px round ${radius.toFixed(1)}px)`;
+      ctx.globalAlpha = 1;
     }
-  }
+
+    function measure() {
+      const vh = window.innerHeight;
+      const top = (sel) => { const el = $(sel); return el ? el.getBoundingClientRect().top + window.scrollY : 0; };
+      const about = top('#about');
+      const projects = top('#projects');
+      const game = top('#mini-game');
+      const contact = top('#contact');
+      // The night is complete before #mini-game (light text) comes into view
+      keys = [
+        [0, [1, 0, 0, 0]],
+        [about - vh * 0.3, [0, 1, 0, 0]],
+        [projects - vh * 0.5, [0, 1, 0, 0]],
+        [projects + vh * 0.1, [0, 0, 1, 0]],
+        [game - vh * 1.3, [0, 0, 1, 0]],
+        [game - vh * 0.95, [0, 0, 0, 1]],
+      ];
+      for (let i = 1; i < keys.length; i++) {
+        if (keys[i][0] <= keys[i - 1][0]) keys[i][0] = keys[i - 1][0] + 1;
+      }
+      starsFrom = game - vh * 0.95;
+      starsTo = Math.max(starsFrom + 1, contact - vh * 0.3);
+      gates.forEach((g) => { g.w = g.left.offsetWidth; });
+      if (hole && windowQuery.matches) {
+        // Scale needed for the oval to grow past every corner of the screen
+        const a = hole.offsetWidth / 2;
+        const b = hole.offsetHeight / 2;
+        const vw = document.documentElement.clientWidth;
+        maxScale = Math.sqrt(((vw / 2) / a) ** 2 + ((vh / 2) / b) ** 2) * 1.12;
+      }
+      drawStars();
+    }
+
+    function weightsAt(y) {
+      if (y <= keys[0][0]) return keys[0][1];
+      for (let i = 1; i < keys.length; i++) {
+        const [y1, w1] = keys[i];
+        if (y <= y1) {
+          const [y0, w0] = keys[i - 1];
+          const t = (y - y0) / (y1 - y0);
+          const e = t * t * (3 - 2 * t); // smooth crossfade, never a jump
+          return w0.map((v, k) => v + (w1[k] - v) * e);
+        }
+      }
+      return keys[keys.length - 1][1];
+    }
+
+    function drawGates(vh) {
+      const vw = document.documentElement.clientWidth;
+      for (const g of gates) {
+        const r = g.el.getBoundingClientRect();
+        const boundary = r.top + r.height / 2;
+        if (boundary < -vh * 0.3 || boundary > vh * 1.3) continue; // only gates near the screen
+        const p = clamp01((vh - boundary) / vh);       // 0 entering from below, 1 leaving at the top
+        const apart = Math.abs(p - 0.5) * 2;           // 0 = meeting in the middle, 1 = fully parted
+        const travel = vw * 0.62;
+        const scale = (1 + (1 - apart) * 0.15).toFixed(3);
+        const leftX = -g.w + vw * 0.06 - apart * travel;
+        const rightX = -vw * 0.06 + apart * travel;
+        g.left.style.transform = `translate3d(${leftX.toFixed(1)}px, -50%, 0) scale(${scale})`;
+        g.right.style.transform = `translate3d(${rightX.toFixed(1)}px, -50%, 0) scale(${scale})`;
+      }
+    }
+
+    function drawWindow(vh) {
+      if (!track || !hole || !windowQuery.matches) return;
+      const extra = vh * 0.7; // the pinned stretch (.window-track::after is 70vh in CSS)
+      const pw = clamp01(-track.getBoundingClientRect().top / extra);
+      hole.style.setProperty('--win-scale', (1 + pw * (maxScale - 1)).toFixed(3));
+      wall.style.opacity = pw > 0.85 ? (1 - (pw - 0.85) / 0.15).toFixed(3) : '1';
+    }
+
+    function draw() {
+      if (!keys.length) return;
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+      const w = weightsAt(y);
+      const s = sky.style;
+      s.setProperty('--w-dawn', w[0].toFixed(3));
+      s.setProperty('--w-day', w[1].toFixed(3));
+      s.setProperty('--w-dusk', w[2].toFixed(3));
+      s.setProperty('--w-night', w[3].toFixed(3));
+      s.setProperty('--w-stars', (w[3] * (0.35 + 0.65 * clamp01((y - starsFrom) / (starsTo - starsFrom)))).toFixed(3));
+      const maxY = Math.max(1, document.documentElement.scrollHeight - vh);
+      s.setProperty('--progress', clamp01(y / maxY).toFixed(4));
+
+      // Header switches to night tokens while it sits over a night section
+      const mid = header.offsetHeight / 2;
+      const overNight = nightBlocks.some((el) => {
+        const r = el.getBoundingClientRect();
+        return r.top <= mid && r.bottom >= mid;
+      });
+      if (overNight !== headerNight) {
+        headerNight = overNight;
+        if (overNight) root.dataset.header = 'night'; else delete root.dataset.header;
+      }
+
+      if (!reduceMotion.matches) {
+        drawGates(vh);
+        drawWindow(vh);
+      }
+    }
+
+    return { measure, draw };
+  })();
+
+  /* =====================================================================
+     Drawings: one-shot moves on hover (mouse) or tap
+     ===================================================================== */
+  (() => {
+    if (reduceMotion.matches) return;
+    const wiggle = (el) => {
+      el.classList.remove('is-wiggling');
+      void el.offsetWidth; // restart the animation
+      el.classList.add('is-wiggling');
+    };
+    document.addEventListener('click', (e) => {
+      const el = e.target.closest && e.target.closest('[data-wiggle]');
+      if (el) wiggle(el);
+    });
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      document.addEventListener('mouseover', (e) => {
+        const el = e.target.closest && e.target.closest('[data-wiggle]');
+        if (el && !el.classList.contains('is-wiggling')) wiggle(el);
+      });
+    }
+    document.addEventListener('animationend', (e) => {
+      if (e.target.classList && e.target.classList.contains('is-wiggling')) e.target.classList.remove('is-wiggling');
+    });
+  })();
 
   /* =====================================================================
      Cursor: small dot + soft contrail on a canvas (mouse only)
@@ -1149,11 +1283,8 @@
     size();
     window.addEventListener('resize', size);
 
-    let color = '#1E3A5F';
-    const readColor = () => { color = getComputedStyle(root).getPropertyValue('--ink').trim() || color; };
-    readColor();
-    themeToggle.addEventListener('click', () => setTimeout(readColor, 120));
-    systemDark.addEventListener('change', readColor);
+    // White + "difference" blending (set in CSS) keeps the dot and trail visible on any sky
+    const color = '#FFFFFF';
 
     let tx = 0;
     let ty = 0;
@@ -1230,5 +1361,6 @@
   buildTrail();
   drawTrail();
   drawClouds();
-  drawPortholes();
+  scene.measure();
+  scene.draw();
 })();

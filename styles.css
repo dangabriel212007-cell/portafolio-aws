@@ -6,7 +6,7 @@
   --sky-light: #EAF6FD;
   --surface: #FFFFFF;
   --ink: #1E3A5F;
-  --ink-soft: #4A5B6E;
+  --ink-soft: #34475C; /* darker than before so it stays AA on the scroll sky */
   --sun: #FFE58A;
   --action: #F5C842;
   --go: #2E7D5B;
@@ -45,24 +45,10 @@
   color-scheme: light;
 }
 
-/* Night flight: follows the system unless the visitor picked a theme */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="day"]) {
-    --sky: #16294A;
-    --sky-light: #0F1E33;
-    --surface: #1E3A5F;
-    --ink: #EAF6FD;
-    --ink-soft: #B9CBDD;
-    --go: #7FD6AE;
-    --alert: #FF9C92;
-    --line: rgba(234, 246, 253, 0.2);
-    --header-bg: rgba(15, 30, 51, 0.92);
-    --stars: 1;
-    --cloud-filter: brightness(0.82) saturate(0.85);
-    color-scheme: dark;
-  }
-}
-:root[data-theme="night"] {
+/* Night tokens: the scroll decides the sky, so sections under the night sky (and the
+   header when it sits over them) switch to light text and navy cards. */
+[data-sky="night"],
+html[data-header="night"] .site-header {
   --sky: #16294A;
   --sky-light: #0F1E33;
   --surface: #1E3A5F;
@@ -72,8 +58,8 @@
   --alert: #FF9C92;
   --line: rgba(234, 246, 253, 0.2);
   --header-bg: rgba(15, 30, 51, 0.92);
-  --stars: 1;
-  --cloud-filter: brightness(0.82) saturate(0.85);
+  --cloud-filter: brightness(0.3) saturate(0.8);
+  color: var(--ink);
   color-scheme: dark;
 }
 
@@ -92,31 +78,10 @@ body {
   font-size: var(--fs-body);
   line-height: 1.6;
   color: var(--ink);
-  background-color: var(--sky-light);
-  background-image: linear-gradient(180deg, var(--sky) 0, var(--sky-light) 900px, var(--sky-light) calc(100% - 700px), var(--sky) 100%);
+  background-color: #CFE9F7; /* the fixed .sky-scene paints the real sky on top */
   overflow-x: hidden;
+  overflow-x: clip; /* clip (not hidden) so position: sticky keeps working */
   -webkit-font-smoothing: antialiased;
-}
-
-/* Stars for night flight */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: var(--stars);
-  background-image:
-    radial-gradient(1.5px 1.5px at 12% 18%, var(--sun) 50%, transparent 51%),
-    radial-gradient(1px 1px at 28% 62%, var(--sun) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 44% 32%, var(--sun) 50%, transparent 51%),
-    radial-gradient(1px 1px at 63% 12%, var(--sun) 50%, transparent 51%),
-    radial-gradient(2px 2px at 78% 44%, var(--sun) 50%, transparent 51%),
-    radial-gradient(1px 1px at 88% 78%, var(--sun) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 6% 86%, var(--sun) 50%, transparent 51%),
-    radial-gradient(1px 1px at 54% 90%, var(--sun) 50%, transparent 51%);
-  background-size: 640px 640px;
-  transition: opacity 600ms ease;
-  z-index: 0;
 }
 
 img, svg { display: block; max-width: 100%; }
@@ -1586,8 +1551,6 @@ html:not(.js) .sky-spot { display: none; }
   will-change: transform;
 }
 
-/* Porthole: blocks open like an airplane window as they scroll in (clip set by script.js) */
-.js .reveal.porthole { opacity: 1; transform: none; }
 
 /* =====================================================================
    Cursor: a small dot with a soft contrail (mouse only)
@@ -1642,3 +1605,196 @@ html.has-cursor, html.has-cursor * { cursor: none !important; }
 .cursor-dot.is-down .cursor-core { transform: scale(0.5); }
 
 [tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
+
+/* =====================================================================
+   Sky that changes with scroll: dawn → day → sunset → night
+   script.js sets the layer opacities on .sky-scene (only opacity changes).
+   ===================================================================== */
+.sky-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  --w-dawn: 1;
+  --w-day: 0;
+  --w-dusk: 0;
+  --w-night: 0;
+  --w-stars: 0;
+}
+.sky-layer,
+.sky-photo,
+.sky-stars {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  will-change: opacity;
+}
+.sky-dawn  { background: linear-gradient(180deg, #FFD9C7 0%, #FFE9B0 45%, #CFE9F7 100%); opacity: var(--w-dawn); }
+.sky-day   { background: linear-gradient(180deg, #A9D8F2 0%, #CDEBFA 60%, #EAF6FD 100%); opacity: var(--w-day); }
+.sky-dusk  { background: linear-gradient(180deg, #FFE58A 0%, #FFC9A8 55%, #E9C2E6 100%); opacity: var(--w-dusk); }
+.sky-night { background: linear-gradient(180deg, #2B2F6B 0%, #1B2450 50%, #0F1A38 100%); opacity: var(--w-night); }
+/* Painted skies: day on top of the day gradient, night dimmed so light text stays AA */
+.sky-photo { background-size: cover; background-position: center; }
+.sky-photo-day { background-image: url("assets/sky-day.webp"); opacity: calc(var(--w-day) * 0.5); }
+.sky-photo-night { background-image: url("assets/sky-night.webp"); filter: brightness(0.6); opacity: calc(var(--w-night) * 0.35); }
+.sky-stars { opacity: var(--w-stars); }
+
+/* Everything readable sits above the sky */
+.site-footer { position: relative; z-index: 1; }
+
+/* =====================================================================
+   Clouds between sections: two big clouds meet in the middle and part,
+   tied to scroll. Behind the content and never clickable.
+   ===================================================================== */
+.cloud-gate {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 70vh;
+  transform: translateY(-50%);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.gate-cloud {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(62vw, 760px);
+  height: auto;
+  filter: var(--cloud-filter);
+  will-change: transform;
+  /* resting position (no script / reduced motion): parted to the sides */
+  transform: translate3d(-140%, -50%, 0);
+}
+.gate-right { transform: translate3d(40%, -50%, 0); }
+@media (max-width: 767px) {
+  .gate-cloud { width: 88vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cloud-gate { display: none; }
+}
+
+/* =====================================================================
+   Airplane window on #projects: the logbook shows through an oval window
+   that grows while the section stays pinned (desktop only).
+   ===================================================================== */
+.window-track { position: relative; }
+.window-wall { display: none; }
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* extra scroll while the window is pinned (inside the content box, or sticky can't move) */
+  .js .window-track::after { content: ""; display: block; height: 70vh; }
+  .js .window-pin { position: sticky; top: 0; }
+  .js .window-pin.reveal { opacity: 1; transform: none; }
+  .js .window-wall {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 3;
+    overflow: hidden;
+    pointer-events: none;
+    will-change: opacity;
+  }
+}
+.window-hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(46vw, 560px);
+  height: min(66vh, 640px);
+  transform: translate(-50%, -50%) scale(var(--win-scale, 1));
+  border-radius: 50% / 44%;
+  border: 18px solid #FBFDFF;
+  /* frame outline + soft inner depth + the cabin wall all around (one shadow, no layout) */
+  box-shadow:
+    inset 0 0 0 2px #1E3A5F,
+    inset 0 10px 24px rgba(30, 58, 95, 0.28),
+    0 0 0 2px #1E3A5F,
+    0 0 0 200vmax #E2EAF2;
+  will-change: transform;
+}
+/* Phones: no wall, the section just fades and scales in */
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+  .js .window-pin.reveal { transform: scale(0.97); }
+  .js .window-pin.reveal.is-in { transform: none; }
+}
+
+/* =====================================================================
+   Little movements in the drawings (CSS only, gentle, 3–6s)
+   ===================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  /* music: sways side to side; two notes float up */
+  .anim-music { position: relative; }
+  .anim-music img { transform-origin: 50% 100%; animation: sway 4.5s ease-in-out infinite; }
+  .anim-music::before,
+  .anim-music::after {
+    content: "♪";
+    position: absolute;
+    top: 30%;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--ink);
+    opacity: 0;
+    pointer-events: none;
+    animation: note-up 5s ease-in-out infinite;
+  }
+  .anim-music::before { left: 18%; }
+  .anim-music::after { right: 16%; content: "♫"; animation-delay: 2.5s; }
+
+  /* skills: a very light "typing" bounce (desktop) */
+  @media (min-width: 900px) {
+    .anim-skills { animation: typing 3s ease-in-out infinite; }
+  }
+
+  /* face: small tilt on hover */
+  .anim-face { transition: transform 300ms var(--ease-out-strong); transform-origin: 50% 80%; }
+
+  /* one-shot moves on hover (mouse) or tap (class set by script.js) */
+  .anim-soccer.is-wiggling { animation: kick-hop 600ms var(--ease-out-strong); }
+  .anim-squash.is-wiggling { animation: squash 500ms var(--ease-out-strong); transform-origin: 50% 100%; }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .license-photo:hover .anim-face { transform: rotate(-4deg); }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+@keyframes note-up {
+  0% { opacity: 0; transform: translateY(10px) rotate(-6deg); }
+  25% { opacity: 0.9; }
+  70% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-46px) rotate(8deg); }
+}
+@keyframes typing {
+  0%, 30%, 60%, 100% { transform: translateY(0); }
+  10% { transform: translateY(-2px); }
+  20% { transform: translateY(0); }
+  40% { transform: translateY(-2px); }
+  50% { transform: translateY(-1px); }
+}
+@keyframes kick-hop {
+  0% { transform: none; }
+  40% { transform: translateY(-14px) rotate(-12deg); }
+  70% { transform: translateY(0) rotate(4deg); }
+  100% { transform: none; }
+}
+@keyframes squash {
+  0% { transform: none; }
+  30% { transform: scale(1.06, 0.94); }
+  60% { transform: scale(0.97, 1.03); }
+  100% { transform: none; }
+}
+
+/* =====================================================================
+   Cursor: white dot with "difference" blending, visible on any sky
+   ===================================================================== */
+.cursor-dot, .cursor-trail { mix-blend-mode: difference; }
+.cursor-core { background: #FFFFFF; box-shadow: 0 0 8px rgba(255, 255, 255, 0.6); }
+.cursor-ring { border-color: #FFFFFF; }

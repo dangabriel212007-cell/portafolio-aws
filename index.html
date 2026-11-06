@@ -23,12 +23,7 @@
   <link rel="preload" as="image" href="assets/hero-plane.webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Apply the saved theme before first paint so the page never flashes the wrong sky -->
   <script>
-    try {
-      var t = localStorage.getItem('theme');
-      if (t === 'night' || t === 'day') document.documentElement.dataset.theme = t;
-    } catch (e) {}
     document.documentElement.classList.add('js');
 
     // Intro: once per visit, never for deep links or for people who turned animations off
@@ -48,6 +43,17 @@
   </script>
 </head>
 <body>
+  <!-- Sky that changes with scroll: dawn → day → sunset → night (opacities set by script.js) -->
+  <div class="sky-scene" aria-hidden="true">
+    <div class="sky-layer sky-dawn"></div>
+    <div class="sky-layer sky-day"></div>
+    <div class="sky-photo sky-photo-day"></div>
+    <div class="sky-layer sky-dusk"></div>
+    <div class="sky-layer sky-night"></div>
+    <div class="sky-photo sky-photo-night"></div>
+    <canvas class="sky-stars"></canvas>
+  </div>
+
   <!-- Icon sprite: simple 24px line icons drawn with currentColor -->
   <svg class="sprite" aria-hidden="true" focusable="false">
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
@@ -161,11 +167,6 @@
           <button type="button" class="pill-toggle" data-lang="en" aria-pressed="true" lang="en">EN</button>
           <button type="button" class="pill-toggle" data-lang="es" aria-pressed="false" lang="es">ES</button>
         </div>
-        <button type="button" class="pill-toggle theme-toggle" id="theme-toggle" aria-pressed="false">
-          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
-          <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
-          <span class="theme-label" data-i18n="theme">Night flight</span>
-        </button>
         <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="nav-list">
           <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
           <svg class="icon icon-close" aria-hidden="true"><use href="#i-close"/></svg>
@@ -218,6 +219,11 @@
 
     <!-- 2. About me -->
     <section class="section" id="about" aria-labelledby="about-title">
+      <!-- Clouds between sections: they meet in the middle and part as you scroll -->
+      <div class="cloud-gate" aria-hidden="true">
+        <img class="gate-cloud gate-left" src="assets/cloud-1.webp" alt="" width="429" height="211" loading="lazy">
+        <img class="gate-cloud gate-right" src="assets/cloud-4.webp" alt="" width="410" height="246" loading="lazy">
+      </div>
       <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
       <div class="sky-spot">
         <p class="sky-hint" id="sky-hint"><span class="sky-hint-text">Tap a cloud ☁</span> · <span class="sky-count">0/5</span></p>
@@ -241,7 +247,7 @@
 
         <article class="license reveal" aria-label="Pilot license" data-i18n-aria="about.license">
           <div class="license-photo">
-            <img src="assets/face.webp" width="320" height="422" loading="lazy"
+            <img class="anim-face" src="assets/face.webp" width="320" height="422" loading="lazy"
                  alt="Cartoon portrait of Daniela smiling, wearing a brown aviator cap with goggles."
                  data-i18n-alt="about.alt">
           </div>
@@ -262,6 +268,11 @@
 
     <!-- 3. Skills -->
     <section class="section" id="skills" aria-labelledby="skills-title">
+      <!-- Clouds between sections: they meet in the middle and part as you scroll -->
+      <div class="cloud-gate" aria-hidden="true">
+        <img class="gate-cloud gate-left" src="assets/cloud-3.webp" alt="" width="347" height="216" loading="lazy">
+        <img class="gate-cloud gate-right" src="assets/cloud-2.webp" alt="" width="237" height="196" loading="lazy">
+      </div>
       <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
       <div class="sky-spot">
         <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-2"
@@ -284,7 +295,7 @@
 
         <div class="skills-layout">
           <figure class="skills-art reveal">
-            <img src="assets/skills.webp" width="640" height="642" loading="lazy"
+            <img class="anim-skills" src="assets/skills.webp" width="640" height="642" loading="lazy"
                  alt="Cartoon of Daniela at a desk using a laptop and a calculator next to a chart with a small cloud."
                  data-i18n-alt="skills.alt">
           </figure>
@@ -338,6 +349,11 @@
 
     <!-- 4. Projects -->
     <section class="section" id="projects" aria-labelledby="projects-title">
+      <!-- Clouds between sections: they meet in the middle and part as you scroll -->
+      <div class="cloud-gate" aria-hidden="true">
+        <img class="gate-cloud gate-left" src="assets/cloud-4.webp" alt="" width="410" height="246" loading="lazy">
+        <img class="gate-cloud gate-right" src="assets/cloud-1.webp" alt="" width="429" height="211" loading="lazy">
+      </div>
       <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
       <div class="sky-spot">
         <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-1"
@@ -352,6 +368,9 @@
           </button>
         </div>
       </div>
+      <!-- Airplane window: content shows through an oval window that grows while this stays pinned -->
+      <div class="window-track">
+        <div class="window-pin reveal">
       <div class="container">
         <header class="section-head reveal">
           <h2 id="projects-title" data-i18n="projects.title">Flight log</h2>
@@ -429,10 +448,18 @@
           </li>
         </ol>
       </div>
+          <div class="window-wall" aria-hidden="true"><div class="window-hole"></div></div>
+        </div>
+      </div>
     </section>
 
     <!-- 5. Fun fact: mini-game -->
-    <section class="section game-section" id="mini-game" aria-labelledby="game-title">
+    <section class="section game-section" data-sky="night" id="mini-game" aria-labelledby="game-title">
+      <!-- Clouds between sections: they meet in the middle and part as you scroll -->
+      <div class="cloud-gate" aria-hidden="true">
+        <img class="gate-cloud gate-left" src="assets/cloud-2.webp" alt="" width="237" height="196" loading="lazy">
+        <img class="gate-cloud gate-right" src="assets/cloud-3.webp" alt="" width="347" height="216" loading="lazy">
+      </div>
       <div class="container">
         <header class="section-head reveal">
           <h2 id="game-title" data-i18n="game.title">Take off on budget</h2>
@@ -564,7 +591,12 @@
     </section>
 
     <!-- 7. Carry-on -->
-    <section class="section" id="carry-on" aria-labelledby="carry-title">
+    <section class="section" data-sky="night" id="carry-on" aria-labelledby="carry-title">
+      <!-- Clouds between sections: they meet in the middle and part as you scroll -->
+      <div class="cloud-gate" aria-hidden="true">
+        <img class="gate-cloud gate-left" src="assets/cloud-1.webp" alt="" width="429" height="211" loading="lazy">
+        <img class="gate-cloud gate-right" src="assets/cloud-3.webp" alt="" width="347" height="216" loading="lazy">
+      </div>
       <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
       <div class="sky-spot">
         <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-3"
@@ -587,33 +619,31 @@
 
         <ul class="tags">
           <li class="tag reveal">
-            <!-- TODO: replace with assets/plushie.webp when Nani sends the new image -->
-            <div class="tag-art is-placeholder">
-              <img src="assets/cloud-2.webp" width="237" height="196" alt="" loading="lazy">
-              <span data-i18n="carry.soon">Photo coming soon</span>
+            <div class="tag-art">
+              <img class="anim-squash" data-wiggle src="assets/plushie.webp" width="594" height="737" loading="lazy"
+                   alt="Cartoon of Daniela hugging her big dog plushie and a small teddy." data-i18n-alt="carry.a1">
             </div>
             <h3 data-i18n="carry.t1">Plushies</h3>
             <p data-i18n="carry.d1">I love plushies. My favorite is one my dad gave me on my 7th birthday.</p>
           </li>
           <li class="tag reveal">
             <div class="tag-art">
-              <img src="assets/soccer.webp" width="620" height="736" loading="lazy"
+              <img class="anim-soccer" data-wiggle src="assets/soccer.webp" width="620" height="736" loading="lazy"
                    alt="Cartoon of Daniela kicking a soccer ball on the grass." data-i18n-alt="carry.a2">
             </div>
             <h3 data-i18n="carry.t2">Soccer</h3>
             <p data-i18n="carry.d2">I play soccer as a center midfielder.</p>
           </li>
           <li class="tag reveal">
-            <!-- TODO: replace with assets/skincare.webp when Nani sends the new image -->
-            <div class="tag-art is-placeholder">
-              <img src="assets/cloud-3.webp" width="347" height="216" alt="" loading="lazy">
-              <span data-i18n="carry.soon">Photo coming soon</span>
+            <div class="tag-art">
+              <img class="anim-squash" data-wiggle src="assets/skincare.webp" width="593" height="752" loading="lazy"
+                   alt="Cartoon of Daniela in a pink robe with a green face mask, holding a cucumber slice next to skincare bottles." data-i18n-alt="carry.a3">
             </div>
             <h3>Skincare</h3>
             <p data-i18n="carry.d3">Skincare is my self-care ritual — it's how my business started.</p>
           </li>
           <li class="tag reveal">
-            <div class="tag-art">
+            <div class="tag-art anim-music">
               <img src="assets/music.webp" width="485" height="616" loading="lazy"
                    alt="Cartoon of Daniela with her eyes closed, listening to music on headphones, surrounded by music notes." data-i18n-alt="carry.a4">
             </div>
@@ -625,7 +655,12 @@
     </section>
 
     <!-- Control tower -->
-    <section class="section" id="contact" aria-labelledby="contact-title">
+    <section class="section" data-sky="night" id="contact" aria-labelledby="contact-title">
+      <!-- Clouds between sections: they meet in the middle and part as you scroll -->
+      <div class="cloud-gate" aria-hidden="true">
+        <img class="gate-cloud gate-left" src="assets/cloud-4.webp" alt="" width="410" height="246" loading="lazy">
+        <img class="gate-cloud gate-right" src="assets/cloud-2.webp" alt="" width="237" height="196" loading="lazy">
+      </div>
       <!-- Fun-fact cloud: pops into little pieces and reveals a fact -->
       <div class="sky-spot">
         <button type="button" class="sky-cloud" aria-expanded="false" aria-controls="fact-4"
@@ -682,7 +717,7 @@
     </section>
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer" data-sky="night">
     <div class="container">
       <p data-i18n="footer">© 2026 Daniela Gabriel Suárez · Built with HTML, CSS &amp; JS · Hosted on AWS Amplify</p>
       <p class="credit" data-i18n="credit">Music: “Infinity Love” by Luminewave (Pixabay)</p>

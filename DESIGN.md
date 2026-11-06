@@ -163,3 +163,25 @@ Shown once per visit (sessionStorage), never for deep links (`#projects`) and ne
   spring-like lerp (0.28). A canvas draws a fading contrail (last 320ms). Over links and buttons the dot shrinks and a
   32px ring appears (160ms); pressing scales it to .9. The canvas stops drawing when the mouse is still.
 - Off on touch screens and with `prefers-reduced-motion`.
+
+## Scroll sky (replaces the Night flight button)
+- A fixed `.sky-scene` behind everything: 4 gradient layers (dawn, day, sunset, night) plus `sky-day.webp` (max 50%
+  opacity) and `sky-night.webp` (35%, brightness .6) and a 2D canvas of stars. One scroll listener + rAF sets
+  `--w-dawn/--w-day/--w-dusk/--w-night/--w-stars` and `--progress` on `.sky-scene` (only opacity changes, smoothstep crossfade).
+- Stops: hero = dawn · about/skills = day · projects = sunset · from just before #mini-game = night (stars grow toward contact).
+- Text: day sections keep navy text; `#mini-game`, `#carry-on`, `#contact` and the footer carry `data-sky="night"`
+  (light text, navy cards). The header switches with `html[data-header="night"]`. `--ink-soft` is now `#34475C` so it
+  stays AA on the painted day sky. All sky text measured ≥ 4.5:1.
+
+## Clouds between sections
+- Two big clouds per section boundary, behind the content and `pointer-events: none`, tied to scroll: they come in from
+  the sides, meet in the middle at mid-screen and part again. Only `transform`. Darker at night. Hidden with reduced motion.
+
+## Airplane window (#projects)
+- Desktop: the section pins (`position: sticky`) for 70vh while an oval window (white frame, navy outline, cabin wall
+  drawn with a 200vmax box-shadow) scales up past the screen corners, then the wall fades. Phones: fade + scale only.
+  Reduced motion: no wall. `body` uses `overflow-x: clip` (not hidden) so sticky works.
+
+## Drawings in motion (CSS only)
+- Music sways ±3° (4.5s) with two notes rising; skills does a light "typing" bounce (desktop, 3s); soccer hops on
+  hover/tap; plushie and skincare squash and stretch on hover/tap; the license face tilts −4° on hover. All off with reduced motion.
